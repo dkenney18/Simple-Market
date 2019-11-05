@@ -20,7 +20,7 @@ router.get('/', function (req, res, next) {
 //get the map for guilds
 router.get('/map', authenticationMiddleware(), function(req, res, next) {
   res.render('map', {
-    title: "lemon[GRAFT] Guild Selctor"
+    title: "lemon[GRAFT] Guild Location Selctor"
   })
 })
 
