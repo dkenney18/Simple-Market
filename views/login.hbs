@@ -1,0 +1,33 @@
+{{> header }}
+<style>
+    .centered {
+        padding: 1%;
+        align-self: center;
+        display: flex;
+    }
+    button {
+      margin: 1%;
+    }
+    </style>
+<h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
+
+{{#if errors}}
+    {{#each errors}}
+        <div>{{this.msg}}</div>
+    {{/each}}
+{{/if}}
+
+<div class="container">
+<form action="/login" method="post">
+    <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" class="form-control" name="username"
+            placeholder="Enter Username">
+    </div>
+        <label for="password">Password</label>
+        <input type="password" class="form-control" placeholder="Password" name="password">
+    </div>
+    <button type="submit" class=" justify-content-center centered lead btn btn-lg btn-secondary container">Login</button>
+ </form>
+</div>
+{{> footer-end }}

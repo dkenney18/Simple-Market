@@ -1,0 +1,109 @@
+{{> header }}
+<style>
+  .centered {
+    padding: 1%;
+    align-self: center;
+    display: flex;
+  }
+</style>
+<main role="main" class="inner cover">
+  <h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
+  {{#if error}}
+  {{#each error}}
+  <div class="alert alert-danger">{{this.msg}}</div>
+  {{/each}}
+  {{/if}}
+  <p class="lead">
+
+    <div class="container .text-*-center">
+      <ul class="nav nav-pills">
+        <li><a data-toggle="pill" href="#home">Home</a></li>
+        <li><a data-toggle="pill" href="#menu1">About Me!</a></li>
+        <li><a data-toggle="pill" href="#menu3">Reset your password</a></li>
+      </ul>
+      <div class="tab-content">
+        <div id="home" class="tab-pane fade in active bg-warning container">
+          <h1>home</h1>
+          <h2>Hello, {{name}} weclome back.</h2>
+        </div>
+        <div id="menu3" class="tab-pane fade">
+          <h1>reset password</h1>
+          <form action="/updatePassword" method="post">
+            <div class="form-group">
+              <label for="newPassword">New Password</label>
+              <input type="text" class="form-control" placeholder="New Password" name="newPassword">
+              <label for="newPasswordMatch">Re-enter new Password</label>
+              <input type="text" class="form-control" placeholder="Re-enter password" name="newPasswordMatch">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+          </form>
+        </div>
+        <div id="menu1" class="tab-pane fade">
+          <h1>profile</h1>
+          <img class="img-thumbnail" src="{{image}}" alt="">
+          <h1> here is the users information you have on file
+          </h1>
+            Name: {{name}}
+            <a data-toggle="modal" data-target="#Username" class="btn btn-warning btn-sm">
+              <span class="glyphicon glyphicon-pencil"></span> Edit Username
+            </a>
+            <br>
+            Email: {{email}}
+            <a data-toggle="modal" data-target="#Email" class="btn btn-warning btn-sm">
+              <span class="glyphicon glyphicon-pencil"></span> Edit Email
+            </a>
+        <!-- Modal content for username-->
+        <div id="Username" class="modal fade" role="dialog">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close bg-warning" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="modal-body">
+                <form action="/updateUsername" method="post">
+                  <div class="form-group">
+                    <label for="newUsername">New Username</label>
+                    <input type="text" class="form-control" placeholder="New Username" name="newUsername">
+                  </div>
+                  <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Modal content-->
+
+      <!-- Email Modal content-->
+      <div id="Email" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close bg-warning" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <form action="/updateEmail" method="post">
+                <div class="form-group">
+                  <label for="email">New Email</label>
+                  <input type="text" class="form-control" placeholder="Email Address" name="newEmail">
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- End Modal content-->
+    </div>
+    </div>
+
+  </p>
+</main>
+{{> footer }}
