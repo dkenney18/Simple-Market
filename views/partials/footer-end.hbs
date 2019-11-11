@@ -85,6 +85,12 @@
             })
         }
 
+        function submitform(loc){
+            document.getElementById('lat').value = `${loc.geometry.coordinates[1]}`
+            document.getElementById('lon').value = `${loc.geometry.coordinates[0]}`
+            document.forms["guild"].submit();
+        }
+
         function getNearestAddress(loc) {
             fetch(
                     `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${loc.geometry.coordinates[1]}&lon=${loc.geometry.coordinates[0]}`)
@@ -99,6 +105,8 @@
                     console.log(geoloc.address.postcode)
                     console.log(geoloc.address.country)
                     console.log(geoloc.address.country_code)
+
+                    submitform(loc)
 
                 }).catch(function (error) {
 

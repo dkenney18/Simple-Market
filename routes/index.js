@@ -260,6 +260,32 @@ router.post('/register', [
     }
   });
 
+//#region guild builder functions
+
+router.get('/guild', authenticationMiddleware(), function(req, res, next) {
+  res.render('guild', {
+    title: "Guild Builder",
+    user: req.body.name,
+    lat: req.body.lat,
+    lon: req.body.lon
+  })
+})
+
+router.post('/guild', function(req, res, next) {
+  console.log("Recived: " + req.body.lat)
+  console.log("Recived: " + req.body.lon)
+  const lat = req.body.lat
+  const lon = req.body.lon
+
+  res.render('guild', {
+    title: "Guild Builder",
+    user: req.body.name,
+    lat: req.body.lat,
+    lon: req.body.lon
+  })
+})
+
+//#endregion
 passport.serializeUser(function (user_id, done) {
   done(null, user_id);
 });
