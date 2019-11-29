@@ -33,13 +33,6 @@
 
     <link rel="stylesheet" href="css/style.css">
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css"
-        integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-
-    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
         integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
@@ -58,7 +51,7 @@
 
 <body>
     <div class="text-center">
-        <header class="masthead mb-auto">
+        <header class="navbar bg-warning">
             <div class="inner">
                 <h3 class="masthead-brand">{{title}}</h3>
                 <nav class="nav nav-masthead justify-content-center">
@@ -67,6 +60,7 @@
                     <a class="nav-link" href="/profile">Profile</a>
                     <a class="nav-link" href="/map">Guild Map</a>
                     <a class="nav-link" href="/logout">Logout</a>
+                    <a class="nav-link" href="/guild">Guild Builder</a>
                     {{else}}
                     <a class="nav-link" href="/register">Register</a>
                     <a class="nav-link" href="/login">Login</a>

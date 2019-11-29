@@ -1,6 +1,15 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport')
+var nodemailer = require('nodemailer')
+
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'bond98041@gmail.com',
+    pass: 'Jb007@mi5'
+  }
+});
 
 const {
   check,
@@ -18,7 +27,7 @@ router.get('/', function (req, res, next) {
 });
 
 //get the map for guilds
-router.get('/map', authenticationMiddleware(), function(req, res, next) {
+router.get('/map', authenticationMiddleware(), function (req, res, next) {
   res.render('map', {
     title: "lemon[GRAFT] Guild Location Selctor"
   })
@@ -27,7 +36,7 @@ router.get('/map', authenticationMiddleware(), function(req, res, next) {
 router.get('/profile', authenticationMiddleware(), function (req, res, next) {
 
   const db = require('../db.js')
-  
+
   //spelling error on phone number
   db.query('SELECT username, email FROM accounts WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
 
@@ -37,6 +46,7 @@ router.get('/profile', authenticationMiddleware(), function (req, res, next) {
       name: results[0].username,
       email: results[0].email
     });
+    db.end()
   })
 });
 
@@ -64,14 +74,14 @@ router.post('/updateUsername', authenticationMiddleware(), [check('newUsername',
         email: results[0].email,
         error: errors.array()
       });
-
+      db.end()
     })
   } else {
     db.query('UPDATE accounts SET username = ? WHERE id = ?', [req.body.newUsername, req.session.passport.user.user_id], function (err, results, fields) {
 
       if (err) throw err
       res.redirect('/profile')
-
+      db.end()
     })
   }
 })
@@ -97,13 +107,14 @@ router.post('/updateEmail', authenticationMiddleware(), [check('newEmail', 'The 
         email: results[0].email,
         error: errors.array()
       });
-
+      db.end()
     })
   } else {
     db.query('UPDATE accounts SET email = ? WHERE id = ?', [req.body.newEmail, req.session.passport.user.user_id], function (err, results, fields) {
 
       if (err) throw err
       res.redirect('/profile')
+      db.end()
     })
   }
 })
@@ -147,7 +158,7 @@ router.post('/updatePassword', authenticationMiddleware(), [check('newPassword',
         email: results[0].email,
         error: errors.array()
       });
-
+      db.end()
     })
   } else {
     bcrypt.hash(req.body.newPassword, saltRounds, function (err, hash) {
@@ -155,6 +166,7 @@ router.post('/updatePassword', authenticationMiddleware(), [check('newPassword',
 
         if (err) throw err
         res.redirect('/profile')
+        db.end()
       })
     })
   }
@@ -168,7 +180,7 @@ router.get('/login', function (req, res, next) {
 });
 
 router.post('/login', passport.authenticate('local', {
-  successRedirect: '/profile',
+  successRedirect: '/tfa',
   failureRedirect: '/login'
 }))
 
@@ -252,9 +264,10 @@ router.post('/register', [
             const user_id = results[0]
 
             req.login(user_id, function (err) {
-              res.redirect('/')
+              res.redirect('/tfa')
             })
           })
+          db.end()
         })
       });
     }
@@ -262,7 +275,21 @@ router.post('/register', [
 
 //#region guild builder functions
 
-router.get('/guild', authenticationMiddleware(), function(req, res, next) {
+router.get('/guild', authenticationMiddleware(), function (req, res, next) {
+  res.render('guild', {
+    title: "Guild Builder",
+    user: req.body.name,
+    lat: req.session.lat,
+    lon: req.session.lon
+  })
+})
+
+router.post('/guild', function (req, res, next) {
+  console.log("Recived: " + req.body.lat)
+  console.log("Recived: " + req.body.lon)
+  req.session.lat = req.body.lat
+  req.session.lon = req.body.lon
+
   res.render('guild', {
     title: "Guild Builder",
     user: req.body.name,
@@ -271,18 +298,49 @@ router.get('/guild', authenticationMiddleware(), function(req, res, next) {
   })
 })
 
-router.post('/guild', function(req, res, next) {
-  console.log("Recived: " + req.body.lat)
-  console.log("Recived: " + req.body.lon)
-  const lat = req.body.lat
-  const lon = req.body.lon
+//two factor authentication
 
-  res.render('guild', {
-    title: "Guild Builder",
-    user: req.body.name,
-    lat: req.body.lat,
-    lon: req.body.lon
+router.get('/tfa', authenticationMiddleware(), function (req, res, next) {
+
+  const db = require('../db')
+
+  db.query('SELECT email FROM accounts WHERE id =' + req.session.passport.user.user_id, function (err, results, fields) {
+    console.log(req.session.passport.user.user_id)
+    console.log(results[0].email)
+    if (err) throw err
+    const mailOptions = {
+      from: 'bond98041@gmail.com',
+      to: results[0].email,
+      subject: 'TFA',
+      text: generate()
+    };
+
+    req.session.text = mailOptions.text
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+      }
+    });
+    res.render('tfa', {
+      title: 'Two Factor Authentication',
+      error: ''
+    });
+    db.end()
   })
+});
+
+router.post('/tfa', function (req, res, next) {
+  if (req.body.tfa == req.session.text) {
+    res.redirect('/profile')
+  } else {
+    res.render('tfa', {
+      title: 'Two Factor Authentication',
+      error: 'Not correct code'
+    })
+  }
 })
 
 //#endregion
@@ -302,5 +360,29 @@ function authenticationMiddleware() {
     res.redirect('/login')
   }
 }
+
+function generate_random_string(string_length) {
+  let random_string = '';
+  let random_ascii;
+  let ascii_low = 65;
+  let ascii_high = 90
+  for (let i = 0; i < string_length; i++) {
+    random_ascii = Math.floor((Math.random() * (ascii_high - ascii_low)) + ascii_low);
+    random_string += String.fromCharCode(random_ascii)
+  }
+  return random_string
+}
+
+function generate_random_number() {
+  let num_low = 1;
+  let num_high = 9;
+  return Math.floor((Math.random() * (num_high - num_low)) + num_low);
+}
+
+function generate() {
+  return generate_random_string(6) + generate_random_number()
+}
+
+console.log(generate())
 
 module.exports = router;

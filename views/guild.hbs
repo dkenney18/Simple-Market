@@ -8,10 +8,46 @@
 </style>
 <main role="main" class="inner cover">
   <h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
-  <p class="lead container">
+  <p class="lead container cover-heading jumbotron bg-warning">
     Guild Builder for [lemon]GRAFT
   </p>
-  <h1>{{lat}}</h1>
-   <h1>{{lon}}</h1>
 </main>
+  <h1 class="jumbotron bg-warning container">Guild Information</h1>
+    <div id="road" class="container guildInfo bg-warning"></div>
+    <div id="house_number" class="container guildInfo bg-warning"></div>
+    <div id="postal_code" class="container guildInfo bg-warning"></div>
+    <div id="county" class="container guildInfo bg-warning"></div>
+    <div id="country" class="container guildInfo bg-warning"></div>
+    <div id="state" class="container guildInfo bg-warning"></div>
+  </p>
+
+<script>
+  getNearestAddress()
+   function getNearestAddress() {
+            fetch("https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat={{lat}}&lon={{lon}}")
+            .then(function (data) {
+              return data.json()
+              }).then(function (geoloc) {
+                    console.log(geoloc.address.road)
+                    console.log(geoloc.address.house_number)
+                    console.log(geoloc.address.road)
+                    console.log(geoloc.address.county)
+                    console.log(geoloc.address.state)
+                    console.log(geoloc.address.postcode)
+                    console.log(geoloc.address.country)
+                    console.log(geoloc.address.country_code)
+
+                    document.getElementById("house_number").textContent = "Home Number: " + geoloc.address.house_number
+                    document.getElementById("road").innerHTML = "Street: " + geoloc.address.road
+                    document.getElementById("postal_code").innerHTML = "Zipcode: " + geoloc.address.postcode
+                    document.getElementById("county").innerHTML = "County: " + geoloc.address.county
+                    document.getElementById("country").innerHTML = "Country: " + geoloc.address.country
+                    document.getElementById("state").innerHTML = "State: " + geoloc.address.state
+                }).catch(function (error) {
+
+                    if (error) throw error
+
+                })
+        }
+</script>
 {{> footer }}

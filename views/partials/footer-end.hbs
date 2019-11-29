@@ -34,10 +34,12 @@
 
         //add a marker to your current location when the page is loaded
         navigator.geolocation.getCurrentPosition(function (p) {
-
-            var marker = L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
-            marker.bindPopup("Hello This your house! it is located at " + p.coords.latitude + " " + p.coords
-                .longitude).openPopup()
+             var cords = {
+                lat: p.coords.latitude,
+                long: p.coords.longitude,
+                showDelete: true
+            }
+            createMarker(cords)
         })
 
         var markers = []
@@ -48,9 +50,15 @@
             if (markers.length < 1) id = 0
             else id = markers[markers.length - 1]._id + 1
 
-            var popupContent =
+             var popupContentTrue =
                 '<button onclick="clearMarker(' + id + ')">Clear Marker</button>' +
                 '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
+
+                 var popupContentFalse =
+                 '<p>Your house is located at:' + cords.lat + ', ' + cords.long + '</p>' +
+                '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
+
+           var popupContent = (cords.showDelete) ?  popupContentFalse : popupContentTrue
 
             myMarker = L.marker([cords.lat, cords.long], {
                 draggable: false

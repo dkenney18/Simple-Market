@@ -26,6 +26,7 @@
     "nan": "^2.14.0",
     "node-gyp": "^5.0.4",
     "node-pre-gyp": "^0.13.0",
+    "nodemailer": "^6.3.1",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "react": "^16.10.1",
