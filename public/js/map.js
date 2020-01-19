@@ -1,158 +1,155 @@
  // Initialize leaflet.js
-        // Initialize the map and set view to your current location
-        //var markers = L.layerGroup()
-        var marker = L.marker()
-        var map = L.map('map', {
-            doubleClickZoom: false,
-            drawControl: true
-        }).locate({
-            setView: true,
-            maxZoom: 18
-        });
+ // Initialize the map and set view to your current location
+ //var markers = L.layerGroup()
 
-        // Initialize the base layer
-        L.tileLayer(
-            'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-                maxZoom: 18,
-                id: 'mapbox.satellite',
-                accessToken: 'pk.eyJ1IjoibGVtb25ncmFmdCIsImEiOiJjazBwZGgyOGcwMDd1M21wZmcwa3V0cnE0In0.AsGe8WOsKpPrQjhHtdf-Rw'
-            }).addTo(map);
+ import https from 'https';
 
-        //add marker where you click
-        map.on('click', function (e) {
+ var marker = L.marker()
+ var map = L.map('map', {
+     doubleClickZoom: false,
+     drawControl: true
+ }).locate({
+     setView: true,
+     maxZoom: 18
+ });
 
-            var cords = {
-                lat: e.latlng.lat,
-                long: e.latlng.lng
-            }
+ // Initialize the base layer
+ L.tileLayer(
+     'https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+         maxZoom: 18,
+         id: 'mapbox.satellite',
+         accessToken: 'pk.eyJ1IjoibGVtb25ncmFmdCIsImEiOiJjazBwZGgyOGcwMDd1M21wZmcwa3V0cnE0In0.AsGe8WOsKpPrQjhHtdf-Rw'
+     }).addTo(map);
 
-            createMarker(cords)
+ //add marker where you click
+ map.on('click', function (e) {
 
-        })
+     var cords = {
+         lat: e.latlng.lat,
+         long: e.latlng.lng
+     }
 
-        //add a marker to your current location when the page is loaded
-        navigator.geolocation.getCurrentPosition(function (p) {
+     createMarker(cords)
 
-            var marker = L.marker([p.coords.latitude, p.coords.longitude]).addTo(map);
-            marker.bindPopup("Hello This your house! it is located at " + p.coords.latitude + " " + p.coords
-                .longitude).openPopup()
-        })
+ })
 
-        var markers = []
+ //add a marker to your approxament location when the page is loaded
 
-        //create markers
-        function createMarker(cords) {
-            var id
-            if (markers.length < 1) id = 0
-            else id = markers[markers.length - 1]._id + 1
+ var markers = []
 
-            var popupContent =
-                '<button onclick="clearMarker(' + id + ')">Clear Marker</button>' +
-                '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
+ //create markers
+ function createMarker(cords) {
+     var id
+     if (markers.length < 1) id = 0
+     else id = markers[markers.length - 1]._id + 1
 
-            myMarker = L.marker([cords.lat, cords.long], {
-                draggable: false
-            });
-            myMarker._id = id
-            var myPopup = myMarker.bindPopup(popupContent, {
-                closeButton: false
-            });
-            map.addLayer(myMarker)
-            markers.push(myMarker)
-        }
+     var popupContent =
+         '<button onclick="clearMarker(' + id + ')">Clear Marker</button>' +
+         '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
 
-        //delete markers
-        function clearMarker(id) {
-            var new_markers = []
-            markers.forEach(function (marker) {
-                if (marker._id == id) map.removeLayer(marker)
-                else new_markers.push(marker)
-            })
-            markers = new_markers
-        }
+     myMarker = L.marker([cords.lat, cords.long], {
+         draggable: false
+     });
+     myMarker._id = id
+     var myPopup = myMarker.bindPopup(popupContent, {
+         closeButton: false
+     });
+     map.addLayer(myMarker)
+     markers.push(myMarker)
+ }
 
-        function setAsGuildLocation(id) {
-            var new_markers = []
-            markers.forEach(function (marker) {
-                if (marker._id == id) {
-                    var loc = marker.toGeoJSON()
-                    console.log("Added " + JSON.stringify(loc.geometry.coordinates[1]) + ", " + JSON.stringify(
-                        loc.geometry.coordinates[0]) + " To guilds")
-                    getNearestAddress(loc)
-                } else new_markers.push(marker)
-            })
-        }
+ //delete markers
+ function clearMarker(id) {
+     var new_markers = []
+     markers.forEach(function (marker) {
+         if (marker._id == id) map.removeLayer(marker)
+         else new_markers.push(marker)
+     })
+     markers = new_markers
+ }
 
-        function getNearestAddress(loc) {
-            fetch(
-                    `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${loc.geometry.coordinates[1]}&lon=${loc.geometry.coordinates[0]}`)
-                .then(function (data) {
-                    return data.json()
-                }).then(function (geoloc) {
-                    console.log(geoloc.address.road)
-                    console.log(geoloc.address.house_number)
-                    console.log(geoloc.address.road)
-                    console.log(geoloc.address.county)
-                    console.log(geoloc.address.state)
-                    console.log(geoloc.address.postcode)
-                    console.log(geoloc.address.country)
-                    console.log(geoloc.address.country_code)
+ function setAsGuildLocation(id) {
+     var new_markers = []
+     markers.forEach(function (marker) {
+         if (marker._id == id) {
+             var loc = marker.toGeoJSON()
+             console.log("Added " + JSON.stringify(loc.geometry.coordinates[1]) + ", " + JSON.stringify(
+                 loc.geometry.coordinates[0]) + " To guilds")
+             getNearestAddress(loc)
+         } else new_markers.push(marker)
+     })
+ }
 
-                }).catch(function (error) {
+ function getNearestAddress(loc) {
+     fetch(
+             `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${loc.geometry.coordinates[1]}&lon=${loc.geometry.coordinates[0]}`)
+         .then(function (data) {
+             return data.json()
+         }).then(function (geoloc) {
+             console.log(geoloc.address.road)
+             console.log(geoloc.address.house_number)
+             console.log(geoloc.address.road)
+             console.log(geoloc.address.county)
+             console.log(geoloc.address.state)
+             console.log(geoloc.address.postcode)
+             console.log(geoloc.address.country)
+             console.log(geoloc.address.country_code)
 
-                    if (error) throw error
+         }).catch(function (error) {
 
-                })
-        }
-        //this functions retreves and the displayes the addresses found
-        function findAddress() {
-            fetch(
-                    `https://nominatim.openstreetmap.org/search/${document.getElementById("addSearch").value}?format=json&limit=8`
-                )
-                .then(function (data) {
+             if (error) throw error
 
-                    return data.json()
+         })
+ }
+ //this functions retreves and the displayes the addresses found
+ function findAddress() {
+     fetch(
+             `https://nominatim.openstreetmap.org/search/${document.getElementById("addSearch").value}?format=json&limit=8`
+         )
+         .then(function (data) {
 
-                }).then(function (results) {
+             return data.json()
 
-                    //clear the tag so it updates dynamicly
-                    document.getElementById("searchResults").innerHTML = ""
+         }).then(function (results) {
 
-                    results.forEach(element => {
+             //clear the tag so it updates dynamicly
+             document.getElementById("searchResults").innerHTML = ""
 
-                        console.log(element.lat)
-                        console.log(element.lon)
-                        console.log(element)
+             results.forEach(element => {
 
-                        document.getElementById("searchResults").innerHTML +=
-                            ` <a class="link" id="${element.place_id}" lat="${element.lat}" lon="${element.lon}" href="#" onclick="handleChangeClick(${element.place_id})"; return false;"><li> ${element.display_name} </li></a>`
+                 console.log(element.lat)
+                 console.log(element.lon)
+                 console.log(element)
 
-                    });
+                 document.getElementById("searchResults").innerHTML +=
+                     ` <a class="link" id="${element.place_id}" lat="${element.lat}" lon="${element.lon}" href="#" onclick="handleChangeClick(${element.place_id})"; return false;"><li> ${element.display_name} </li></a>`
+
+             });
 
 
-                }).catch(function (error) {
+         }).catch(function (error) {
 
-                    if (error) throw error
+             if (error) throw error
 
-                })
-        }
+         })
+ }
 
-        //this handles the click events for the anchor tags
-        function handleChangeClick(id) {
-            var lat = document.getElementById(`${id}`).getAttribute('lat')
-            var lon = document.getElementById(`${id}`).getAttribute('lon')
+ //this handles the click events for the anchor tags
+ function handleChangeClick(id) {
+     var lat = document.getElementById(`${id}`).getAttribute('lat')
+     var lon = document.getElementById(`${id}`).getAttribute('lon')
 
-            changMapView(lat, lon)
-        }
+     changMapView(lat, lon)
+ }
 
-        //changes the view of the map
-        function changMapView(lat, lon) {
-            map.panTo([lat, lon], 18)
-            var cords = {
-                lat: lat,
-                long: lon
-            }
-            //creates marker on spot you searched for
-            createMarker(cords)
-        }
+ //changes the view of the map
+ function changMapView(lat, lon) {
+     map.panTo([lat, lon], 18)
+     var cords = {
+         lat: lat,
+         long: lon
+     }
+     //creates marker on spot you searched for
+     createMarker(cords)
+ }

@@ -6,8 +6,8 @@ var nodemailer = require('nodemailer')
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: 'bond98041@gmail.com',
-    pass: ''
+    user: process.env.EMAIL_USERNAME,
+    pass: process.env.EMAIL_PASSWORD
   }
 });
 
@@ -37,7 +37,6 @@ router.get('/profile', authenticationMiddleware(), function (req, res, next) {
 
   const db = require('../db.js')
 
-  //spelling error on phone number
   db.query('SELECT username, email FROM accounts WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
 
     if (err) throw err
@@ -328,7 +327,7 @@ router.get('/tfa', authenticationMiddleware(), function (req, res, next) {
       title: 'Two Factor Authentication',
       error: ''
     });
-    db.end()
+    //db.end()
   })
 });
 

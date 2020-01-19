@@ -2,6 +2,9 @@
              // Initialize leaflet.js
         // Initialize the map and set view to your current location
         //var markers = L.layerGroup()
+
+        const url = 'https://ipapi.co/json/';
+
         var marker = L.marker()
         var map = L.map('map', {
             doubleClickZoom: false,
@@ -33,15 +36,37 @@
         })
 
         //add a marker to your current location when the page is loaded
+
+    if (navigator.geolocation) {
+        console.log("geolocation is supported")
+    } else {
+        console.log("geolocation is not supported")
+    }
+
+    $.getJSON('https://ipapi.co/json/', function(data){
+             console.log(data)
+        }).then(function(data) {
+             let cords = {
+                lat: data.latitude,
+                long: data.longitude,
+                showDelete: true
+            }
+            createMarker(cords)
+            console.log("created marker")
+        })
+
         navigator.geolocation.getCurrentPosition(function (p) {
-             var cords = {
+             let cords = {
                 lat: p.coords.latitude,
                 long: p.coords.longitude,
                 showDelete: true
             }
+            markers.pop()
             createMarker(cords)
+        }, function(error) {
+            if (error)
+                console.log(error) 
         })
-
         var markers = []
 
         //create markers
@@ -55,7 +80,7 @@
                 '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
 
                  var popupContentFalse =
-                 '<p>Your house is located at:' + cords.lat + ', ' + cords.long + '</p>' +
+                 '<p>Your house or approxament location:' + cords.lat + ', ' + cords.long + '</p>' +
                 '<button onclick="setAsGuildLocation(' + id + ')">Set As Guild Location</button>';
 
            var popupContent = (cords.showDelete) ?  popupContentFalse : popupContentTrue
@@ -69,6 +94,16 @@
             });
             map.addLayer(myMarker)
             markers.push(myMarker)
+
+            centerLeafletMapOnMarker(map, myMarker)
+
+        }
+
+        //centers the map on the lat and lon bounds of a marker
+         function centerLeafletMapOnMarker(map, marker) {
+            let latLngs = [ marker.getLatLng()];
+            let markerBounds = L.latLngBounds(latLngs);
+            map.fitBounds(markerBounds);
         }
 
         //delete markers
