@@ -66,7 +66,7 @@ passport.use(new LocalStrategy(
   function (username, password, done) {
     const db = require('./db')
 
-    db.query('SELECT id, password FROM accounts WHERE username = ?', [username], function (err, results, fields) {
+    db.query('SELECT id, password FROM users WHERE username = ?', [username], function (err, results, fields) {
 
       if (err) {
         done(err)

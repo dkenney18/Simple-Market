@@ -1,0 +1,26 @@
+{{> header }}
+<style>
+  .centered {
+    padding: 1%;
+    align-self: center;
+    display: flex;
+  }
+</style>
+<main role="main" class="inner cover">
+  <h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
+  <p class="display-3 cover-heading bg-light">You have: {{money}} dollar(s) to spend</p>
+
+  <div class="container">
+    <form action="/bank" method="post">
+      <div class="form-group">
+        <label for="money">deposit money: </label>
+        <input type="text" class="form-control" name="desposit" placeholder="Enter amount to desposit">
+      </div>
+  </div>
+  <button type="submit" class=" justify-content-center centered lead btn btn-lg btn-secondary container">Desposit</button>
+  </form>
+  </div>
+
+  </div>
+</main>
+{{> footer }}

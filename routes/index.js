@@ -1,15 +1,6 @@
 var express = require('express');
 var router = express.Router();
 var passport = require('passport')
-var nodemailer = require('nodemailer')
-
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USERNAME,
-    pass: process.env.EMAIL_PASSWORD
-  }
-});
 
 const {
   check,
@@ -22,164 +13,36 @@ const saltRounds = 10;
 /* GET home page. */
 router.get('/', function (req, res, next) {
   res.render('home', {
-    title: 'Test Session'
+    title: 'SimpleMarket'
   });
 });
-
-//get the map for guilds
-router.get('/map', authenticationMiddleware(), function (req, res, next) {
-  res.render('map', {
-    title: "lemon[GRAFT] Guild Location Selctor"
-  })
-})
 
 router.get('/profile', authenticationMiddleware(), function (req, res, next) {
 
   const db = require('../db.js')
 
-  db.query('SELECT username, email FROM accounts WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
-
-    if (err) throw err
-    res.render('profile', {
-      title: 'profile',
-      name: results[0].username,
-      email: results[0].email
-    });
-    db.end()
-  })
+  db.query('SELECT username, email FROM users WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
+    const result = results
+    db.query('SELECT * FROM items WHERE seller = ?', [req.session.passport.user.user_id], function (err, results, fields) {
+      if (err) throw err
+      res.render('profile', {
+        title: 'profile',
+        name: result[0].username,
+        email: result[0].email,
+        item: results
+      });
+    })
+  });
 });
-
-//#region Update Stuff
-
-
-router.post('/updateUsername', authenticationMiddleware(), [check('newUsername', 'Username can only contain letters, numbers, or underscores.').matches(/^[A-Za-z0-9_-]+$/, 'i'),
-  check('newUsername', 'Username field cannot be empty.').not().isEmpty(),
-  check('newUsername', 'Username must be between 4-15 characters long.').isLength({
-    min: 4,
-    max: 15
-  }),
-], function (req, res, next) {
-
-  const db = require('../db.js')
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    db.query('SELECT username, email WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
-
-      if (err) throw err
-      res.render('profile', {
-        title: 'profile',
-        name: results[0].username,
-        email: results[0].email,
-        error: errors.array()
-      });
-      db.end()
-    })
-  } else {
-    db.query('UPDATE accounts SET username = ? WHERE id = ?', [req.body.newUsername, req.session.passport.user.user_id], function (err, results, fields) {
-
-      if (err) throw err
-      res.redirect('/profile')
-      db.end()
-    })
-  }
-})
-
-router.post('/updateEmail', authenticationMiddleware(), [check('newEmail', 'The email you entered is invalid, please try again.').isEmail(),
-  check('newEmail', 'Email field cannot be empty.').not().isEmpty(),
-  check('newEmail', 'Email address must be between 4-100 characters long, please try again.').isLength({
-    min: 4,
-    max: 100
-  }),
-], function (req, res, next) {
-
-  const db = require('../db.js')
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    db.query('SELECT username, email FROM accounts WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
-
-      if (err) throw err
-      res.render('profile', {
-        title: 'profile',
-        name: results[0].username,
-        email: results[0].email,
-        error: errors.array()
-      });
-      db.end()
-    })
-  } else {
-    db.query('UPDATE accounts SET email = ? WHERE id = ?', [req.body.newEmail, req.session.passport.user.user_id], function (err, results, fields) {
-
-      if (err) throw err
-      res.redirect('/profile')
-      db.end()
-    })
-  }
-})
-
-router.post('/updatePassword', authenticationMiddleware(), [check('newPassword', 'Password must be between 8-100 characters long.').isLength({
-    min: 8,
-    max: 100
-  }),
-  check('newPasswordMatch', 'Password must be between 8-100 characters long.').isLength({
-    min: 8,
-    max: 100
-  }),
-  check('newPassword').isLength({
-    min: 8,
-    max: 100
-  })
-  .custom((value, {
-    req,
-    loc,
-    path
-  }) => {
-    if (value !== req.body.newPasswordMatch) {
-      return false;
-    } else {
-      return value;
-    }
-  }).withMessage("Passwords don't match."),
-], function (req, res, next) {
-
-
-  const db = require('../db.js')
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    db.query('SELECT username, email FROM accounts WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
-
-      if (err) throw err
-      res.render('profile', {
-        title: 'profile',
-        name: results[0].username,
-        email: results[0].email,
-        error: errors.array()
-      });
-      db.end()
-    })
-  } else {
-    bcrypt.hash(req.body.newPassword, saltRounds, function (err, hash) {
-      db.query('UPDATE accounts SET password = ? WHERE id = ?', [hash, req.session.passport.user.user_id], function (err, results, fields) {
-
-        if (err) throw err
-        res.redirect('/profile')
-        db.end()
-      })
-    })
-  }
-})
-//#endregion 
 
 router.get('/login', function (req, res, next) {
   res.render('login', {
-    title: '[lemon]GRAFT Login'
+    title: 'SimpleMarket Login'
   });
 });
 
 router.post('/login', passport.authenticate('local', {
-  successRedirect: '/tfa',
+  successRedirect: '/profile',
   failureRedirect: '/login'
 }))
 
@@ -251,7 +114,7 @@ router.post('/register', [
 
       //do database stuff here
       bcrypt.hash(password, saltRounds, function (err, hash) {
-        db.query('INSERT INTO accounts (username, email, password) VALUES (?, ?, ?)', [username, email, hash], function (err, results, fields) {
+        db.query('INSERT INTO users (username, email, password, money) VALUES (?, ?, ?, ?)', [username, email, hash, 0], function (err, results, fields) {
 
           if (err) throw err;
 
@@ -263,86 +126,120 @@ router.post('/register', [
             const user_id = results[0]
 
             req.login(user_id, function (err) {
-              res.redirect('/tfa')
+              res.redirect('/profile')
             })
           })
-          db.end()
+
         })
       });
     }
   });
 
-//#region guild builder functions
-
-router.get('/guild', authenticationMiddleware(), function (req, res, next) {
-  res.render('guild', {
-    title: "Guild Builder",
-    user: req.body.name,
-    lat: req.session.lat,
-    lon: req.session.lon
+//sell item view and post logic
+router.get('/sell', function (req, res, next) {
+  res.render('sell', {
+    title: 'Simple Market Sell Items'
   })
 })
 
-router.post('/guild', function (req, res, next) {
-  console.log("Recived: " + req.body.lat)
-  console.log("Recived: " + req.body.lon)
-  req.session.lat = req.body.lat
-  req.session.lon = req.body.lon
-
-  res.render('guild', {
-    title: "Guild Builder",
-    user: req.body.name,
-    lat: req.body.lat,
-    lon: req.body.lon
-  })
-})
-
-//two factor authentication
-
-router.get('/tfa', authenticationMiddleware(), function (req, res, next) {
-
+router.post('/sell', function (req, res, next) {
   const db = require('../db')
 
-  db.query('SELECT email FROM accounts WHERE id =' + req.session.passport.user.user_id, function (err, results, fields) {
-    console.log(req.session.passport.user.user_id)
-    console.log(results[0].email)
+  db.query('INSERT INTO items (name, price, description, seller, sold, quantity) VALUES (?, ?, ?, ?, ?, ?)', [req.body.itemName, req.body.itemPrice, req.body.itemDescription, req.session.passport.user.user_id, false, req.body.itemQuantity], function (err, results, fields) {
     if (err) throw err
-    const mailOptions = {
-      from: 'bond98041@gmail.com',
-      to: results[0].email,
-      subject: 'TFA',
-      text: generate()
-    };
 
-    req.session.text = mailOptions.text
+    res.redirect('/market')
 
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log('Email sent: ' + info.response);
-      }
-    });
-    res.render('tfa', {
-      title: 'Two Factor Authentication',
-      error: ''
-    });
-    //db.end()
+
   })
-});
-
-router.post('/tfa', function (req, res, next) {
-  if (req.body.tfa == req.session.text) {
-    res.redirect('/profile')
-  } else {
-    res.render('tfa', {
-      title: 'Two Factor Authentication',
-      error: 'Not correct code'
-    })
-  }
 })
 
-//#endregion
+//market view and post logic
+router.get('/market', function (req, res, next) {
+  const db = require('../db')
+
+  db.query('SELECT * FROM items', function (err, results, fields) {
+    if (err) throw err
+    res.render(
+      'market', {
+        title: 'Simple Market market',
+        item: results
+      })
+  })
+})
+
+//market post logic
+router.get('/market/:itemID', function (req, res, next) {
+  const item_id = req.params.itemID
+  const db = require('../db')
+  //get money and price to subtract
+  db.query('SELECT money FROM users WHERE ID = ? UNION SELECT price FROM items WHERE ID = ?', [req.session.passport.user.user_id, item_id], function (err, results, fields) {
+    if (err) throw err
+    var money = results[0].money - results[1].money
+    //update money for the current user 
+    db.query('UPDATE users SET money = ? WHERE ID = ?', [money, req.session.passport.user.user_id], function (err, results, fields) {
+      if (err) throw err
+      db.query('SELECT seller FROM items WHERE ID = ?', [item_id], function(err, results, fields) {
+        if (err) throw err
+        const seller_id = results[0].seller
+        db.query('SELECT money FROM users WHERE ID = ? UNION SELECT price FROM items WHERE ID = ?', [seller_id, item_id], function(err, results, fields) {
+          if (err) throw err
+          var seller_money = results[0].money
+          var item_price = results[1].money
+          var money = seller_money + item_price
+          db.query('UPDATE users SET money = ? WHERE ID = ?', [money, seller_id], function(err, results, fields) {
+
+            db.query('DELETE FROM items WHERE ID = ?', [item_id], function (err, results, fields) {
+              if (err) throw err
+              res.redirect('/market')
+            })
+          })
+        })
+      })
+    })
+  })
+})
+
+
+//bank logic
+router.get('/bank', function (req, res, next) {
+  const db = require('../db')
+
+  db.query('SELECT money FROM users WHERE id = ?', [req.session.passport.user.user_id], function (err, results, fields) {
+    if (err) throw err
+    res.render(
+      'bank', {
+        title: 'Simple Bank',
+        money: results[0].money
+      })
+  })
+})
+
+router.post('/bank', function (req, res, next) {
+  const db = require('../db')
+  db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function (err, results, fields) {
+    var userMoney = results[0].money 
+    console.log(userMoney)
+    var desposit = parseInt(req.body.desposit)
+    console.log(desposit)
+    var money = userMoney + desposit
+    console.log(money)
+    db.query('UPDATE users SET money = ? WHERE id = ?', [money, req.session.passport.user.user_id], function (err, results, fields) {
+      if (err) throw err
+      console.log(results)
+      db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function(err, results, fields) {
+        if (err) throw err 
+        res.render(
+          'bank', {
+            title: 'Simple Bank',
+            money: results[0].money
+          })
+      })
+    })
+  })
+})
+
+
 passport.serializeUser(function (user_id, done) {
   done(null, user_id);
 });

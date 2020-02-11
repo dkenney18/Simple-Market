@@ -1,0 +1,31 @@
+{{> header }}
+<style>
+  .centered {
+    padding: 1%;
+    align-self: center;
+    display: flex;
+  }
+</style>
+<main role="main" class="inner cover">
+  <h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
+  <p class="lead">
+    <div class="container .text-*-center">
+      {{#each item}}
+      <div class="card container .text-*-center">
+        <div class="card-body">
+          <h4 class="card-title text-*-center">{{this.name}}</h4>
+          <p class="card-text text-*-center">Desctiption: {{this.description}}</p>
+          <p class="card-text text-*-center">Quantity: {{this.quantity}}</p>
+          <p class="card-text text-*-center">Seller ID: {{this.seller}}</p>
+          <p class="card-text text-*-center">Item ID: {{this.ID}}</p>
+           <p class="card-text text-*-center">Item Price: {{this.price}}</p>
+          <a class="btn btn-primary container .text-*-center" href="/market/{{this.ID}}" id="{{this.ID}}" price="{{this.price}}">
+            Buy {{this.name}}
+          </a>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </p>
+</main>
+{{> footer }}
