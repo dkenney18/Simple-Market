@@ -5,8 +5,8 @@
   "main": "bin/www",
   "scripts": {
     "start": "node ./bin/www",
-    "build": "browserify map.js -o bundle.js",
-    "watch": "beefy map.js:bundle.js --live"
+    "build": "",
+    "test": ""
   },
   "author": "Sandeep Raveesh Remande and updated by Devin",
   "license": "ISC",
