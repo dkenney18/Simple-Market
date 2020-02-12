@@ -7,6 +7,11 @@
   }
 </style>
 <main role="main" class="inner cover">
+  {{#if error}}
+    {{#each error}}
+        <div class="alert alert-danger">{{this.msg}}</div>
+    {{/each}}
+{{/if}}
   <h1 class="cover-heading jumbotron bg-warning container">{{title}}</h1>
   <p class="display-3 cover-heading bg-light">You have: {{money}} dollar(s) to spend</p>
 

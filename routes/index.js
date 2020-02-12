@@ -230,8 +230,22 @@ router.get('/bank', function (req, res, next) {
   })
 })
 
-router.post('/bank', function (req, res, next) {
+router.post('/bank', [
+  check('desposit', 'Bank can only accept numbers').matches(/^[0-9_-]+$/, 'i'),
+  check('desposit', 'Item Name field cannot be empty.').not().isEmpty(),
+], function (req, res, next) {
   const db = require('../db')
+  const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function(err, results, fields) {
+        res.render('bank', {
+          title: 'Bank Error',
+          error: errors.array(),
+          money: results[0].money
+        })
+      })
+    } else {
   db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function (err, results, fields) {
     var userMoney = results[0].money 
     var desposit = parseInt(req.body.desposit)
@@ -248,6 +262,7 @@ router.post('/bank', function (req, res, next) {
       })
     })
   })
+  }
 })
 
 
