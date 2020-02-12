@@ -12,6 +12,9 @@ var MySQLStore = require('express-mysql-session')(session)
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy
 
+var compression = require('compression')
+var helmet = require('helmet')
+
 var index = require('./routes/index');
 var users = require('./routes/users');
 
@@ -26,6 +29,8 @@ app.set('view engine', 'hbs');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(compression())
+app.use(helmet())
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
