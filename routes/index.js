@@ -121,8 +121,6 @@ router.post('/register', [
           db.query('SELECT LAST_INSERT_ID() as user_id', function (error, results, fields) {
             if (error) throw error
 
-            console.log(results[0])
-
             const user_id = results[0]
 
             req.login(user_id, function (err) {
@@ -142,16 +140,33 @@ router.get('/sell', function (req, res, next) {
   })
 })
 
-router.post('/sell', function (req, res, next) {
+router.post('/sell',  [
+  check('itemName', 'Item Name can only contain letters, numbers, or underscores.').matches(/^[A-Za-z0-9_-]+$/, 'i'),
+  check('itemName', 'Item Name field cannot be empty.').not().isEmpty(),
+  check('itemPrice', 'Item Price can only contain letters, numbers, or underscores.').matches(/^[0-9_-]+$/, 'i'),
+  check('itemPrice', 'Item Pricefield cannot be empty.').not().isEmpty(),
+  check('itemDescription', 'Item Price can only contain letters, numbers, or underscores.').matches(/^[A-Za-z0-9_-]+$/, 'i'),
+  check('itemDescription', 'Item Pricefield cannot be empty.').not().isEmpty(),
+  check('itemQuantity', 'Item Price can only contain letters, numbers, or underscores.').matches(/^[0-9_-]+$/, 'i'),
+  check('itemQuantity', 'Item Pricefield cannot be empty.').not().isEmpty(),
+], function (req, res, next) {
   const db = require('../db')
+  const errors = validationResult(req);
 
-  db.query('INSERT INTO items (name, price, description, seller, sold, quantity) VALUES (?, ?, ?, ?, ?, ?)', [req.body.itemName, req.body.itemPrice, req.body.itemDescription, req.session.passport.user.user_id, false, req.body.itemQuantity], function (err, results, fields) {
-    if (err) throw err
-
-    res.redirect('/market')
-
-
-  })
+    if (!errors.isEmpty()) {
+      res.render('sell', {
+        title: 'Sell error',
+        error: errors.array()
+      })
+    } else {
+      db.query('INSERT INTO items (name, price, description, seller, sold, quantity) VALUES (?, ?, ?, ?, ?, ?)', [req.body.itemName, req.body.itemPrice, req.body.itemDescription, req.session.passport.user.user_id, false, req.body.itemQuantity], function (err, results, fields) {
+        if (err) throw err
+    
+        res.redirect('/market')
+    
+    
+      })
+    }
 })
 
 //market view and post logic
@@ -219,14 +234,10 @@ router.post('/bank', function (req, res, next) {
   const db = require('../db')
   db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function (err, results, fields) {
     var userMoney = results[0].money 
-    console.log(userMoney)
     var desposit = parseInt(req.body.desposit)
-    console.log(desposit)
     var money = userMoney + desposit
-    console.log(money)
     db.query('UPDATE users SET money = ? WHERE id = ?', [money, req.session.passport.user.user_id], function (err, results, fields) {
       if (err) throw err
-      console.log(results)
       db.query('SELECT money FROM users WHERE ID = ?', [req.session.passport.user.user_id], function(err, results, fields) {
         if (err) throw err 
         res.render(
@@ -278,7 +289,5 @@ function generate_random_number() {
 function generate() {
   return generate_random_string(6) + generate_random_number()
 }
-
-console.log(generate())
 
 module.exports = router;
