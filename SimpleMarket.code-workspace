@@ -4,5 +4,19 @@
 			"path": "."
 		}
 	],
-	"settings": {}
+	"settings": {
+		"sqltools.connections": [
+			{
+				"database": "muhndico_SimpleMarket",
+				"dialect": "MySQL",
+				"isActive": false,
+				"isConnected": false,
+				"name": "simpleMarket",
+				"password": "LemonGraft1",
+				"port": 3306,
+				"server": "muhndi.com",
+				"username": "muhndico_DevKen"
+			}
+		]
+	}
 }
